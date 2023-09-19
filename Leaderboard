@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+
+        input {
+            padding: 5px;
+            margin: 5px;
+        }
+
+        ol {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f7f7f7;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        /* Style for the greyed-out button */
+        button[disabled] {
+            background-color: grey;
+            cursor: not-allowed; /* Change the cursor to a "not-allowed" symbol */
+        }
+
+        #resetButton {
+            background-color: #ff3333;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard</h1>
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button onclick="addEntry()">Add to Leaderboard</button>
+    <div id="leaderboard">
+        <h2>Top Times</h2>
+        <ol id="leaderList">
+            <!-- Leaderboard entries will go here -->
+        </ol>
+    </div>
+
+    <button id="resetButton" onclick="resetMemory()">Reset Board</button>
+
+    <script>
+        const leaderboard = document.getElementById('leaderList');
+        const nameInput = document.getElementById('nameInput');
+        const addButton = document.querySelector('button');
+
+        // Check if a name is already stored in local storage
+        const storedName = localStorage.getItem('leaderboardName');
+
+        if (storedName) {
+            // If a name is found, disable the input and change the button color to grey
+            nameInput.value = storedName;
+            nameInput.disabled = true;
+            addButton.disabled = true;
+            addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+        }
+
+        // Check if leaderboard data is already stored in local storage
+        const storedLeaderboard = localStorage.getItem('leaderboardData');
+
+        // Initialize the leaderboard with the stored data or an empty array
+        const leaderboardData = storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+
+        // Update the leaderboard display based on the stored data
+        for (const entryData of leaderboardData) {
+            const entry = document.createElement('li');
+            entry.innerHTML = `<strong>${entryData.name}</strong>: ${entryData.time} seconds`;
+            leaderboard.appendChild(entry);
+        }
+
+        function addEntry() {
+            const name = nameInput.value.trim();
+
+            if (name === '') {
+                alert('Please enter a name.');
+                return;
+            }
+
+            const entry = document.createElement('li');
+            entry.innerHTML = `<strong>${name}</strong>: Waiting for data..`;
+
+            leaderboard.appendChild(entry);
+
+            // Store the entered name in local storage
+            localStorage.setItem('leaderboardName', name);
+
+            // Disable the input and change the button color to grey after adding the name
+            nameInput.disabled = true;
+            addButton.disabled = true;
+            addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+
+            // Clear input field
+            nameInput.value = '';
+
+            // Add the entry data to the leaderboard data
+            const entryData = { name, time: 'N/A' };
+            leaderboardData.push(entryData);
+
+            // Update the stored leaderboard data
+            localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+        }
+
+        // Simulate receiving data from the ESP32 and update the leaderboard
+        function updateEntry(name, time) {
+            const entries = leaderboard.querySelectorAll('li');
+
+            // Find the most recent entry with "N/A" and update it
+            for (let i = entries.length - 1; i >= 0; i--) {
+                const entryText = entries[i].textContent;
+                if (entryText.includes('N/A')) {
+                    entries[i].textContent = `<strong>${name}</strong>: ${time} seconds`;
+                    break;
+                }
+            }
+
+            // Update the leaderboard data with the received time
+            const updatedEntry = leaderboardData.find((entryData) => entryData.name === name);
+            if (updatedEntry) {
+                updatedEntry.time = time;
+                localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+            }
+        }
+
+        function resetMemory() {
+            // Clear the name from local storage
+            localStorage.removeItem('leaderboardName');
+
+            // Alert
+            const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO REMOVE STORAGE! THIS CANNOT BE UNDONE!?");
+            
+            // Check if the user clicked "Cancel"
+            if (userConfirmed) {
+                // User clicked "OK" or closed the dialog
+                alert("Deleting...");
+                // Clear the leaderboard data from local storage
+                localStorage.removeItem('leaderboardData');
+                // Refresh the page to clear the displayed data
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

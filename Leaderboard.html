@@ -117,16 +117,15 @@ button:hover {
     </div>
     
 
-    <button id="resetButton" onclick="resetMemory()">Reset Board</button>
 
     <input type="text" id="manualTimeInput" placeholder="Enter time (seconds)">
     <button onclick="addManualTime()" title="Manual Time">Manual Time</button>
     
 
-    <label for="timeLimitInput">Time Limit (min):</label>
+
 <input type="number" id="timeLimitInput" value="30" min="1"  placeholder="Default: 30(min)">
 <button onclick="setDisqualificationTimeLimit()" title="Max Allowed time" >Set Limit</button>
-
+<button id="resetButton" onclick="resetMemory()">Reset Board</button>
 <div id="leaderboard">
     <ol id="leaderList">
         <!-- Leaderboard entries will go here -->

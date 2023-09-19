@@ -42,6 +42,8 @@
 
         h1, h2 {
             color: #333;
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
         button {
@@ -104,7 +106,8 @@ button:hover {
     <h1>Leaderboard</h1>
     <div style="display: inline-block;">
         <input type="text" id="nameInput" placeholder="Enter Your Geo-Name">
-        <button onclick="addEntry()">Add to Leaderboard</button>
+        <button onclick="addEntry()" title="Click to Add to Leaderboard">Add to Leaderboard</button>
+
     </div>
     <div id="leaderboard">
         <h2>Top Times</h2>
@@ -117,12 +120,12 @@ button:hover {
     <button id="resetButton" onclick="resetMemory()">Reset Board</button>
 
     <input type="text" id="manualTimeInput" placeholder="Enter time (seconds)">
-    <button onclick="addManualTime()">Manual Time</button>
+    <button onclick="addManualTime()" title="Manual Time">Manual Time</button>
     
 
     <label for="timeLimitInput">Time Limit (min):</label>
 <input type="number" id="timeLimitInput" value="30" min="1"  placeholder="Default: 30(min)">
-<button onclick="setDisqualificationTimeLimit()">Set Limit</button>
+<button onclick="setDisqualificationTimeLimit()" title="Max Allowed time" >Set Limit</button>
 
 <div id="leaderboard">
     <ol id="leaderList">

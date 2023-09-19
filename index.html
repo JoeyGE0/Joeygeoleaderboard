@@ -57,7 +57,7 @@
 }
 
 input {
-    padding: 7px 15px; /* Set padding to match the button */
+    padding: 7px 2px; /* Set padding to match the button */
     margin: 5px;
     margin-right: -4px;
     border-radius: 4px;
@@ -105,7 +105,8 @@ button:hover {
 
     <h1>Leaderboard</h1>
     <div style="display: inline-block;">
-        <input type="text" id="nameInput" placeholder="Enter Your Geo-Name">
+        <input type="text" id="nameInput" placeholder="Enter Your Geo-Name" minlength="3" maxlength="24">
+
         <button onclick="addEntry()" title="Click to Add to Leaderboard">Add to Leaderboard</button>
 
     </div>
@@ -409,6 +410,7 @@ function resetMemory() {
         location.reload();
     }
 }
+
 
     </script>
 

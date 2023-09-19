@@ -365,14 +365,15 @@ function disqualifyUser(name, reason, timeLimit) {
     leaderboardData.push(...updatedLeaderboardData);
     localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData)); // Update leaderboard data
 
-    // Check if the time exceeds the disqualification time limit
-    if (timeLimit !== undefined && timeLimit !== null) {
-        if (timeLimit <= 0) {
-            alert('Disqualification time limit reached. The user is disqualified.');
-        } else {
-            alert(`The user is disqualified due to: ${reason}. Disqualification time limit exceeded by ${timeLimit} seconds.`);
-        }
+// Check if the time exceeds the disqualification time limit and display the user's name
+if (timeLimit !== undefined && timeLimit !== null) {
+    if (timeLimit <= 0) {
+        alert(`Time Limit reached! User: "${name}" has been disqualified.`);
+    } else {
+        alert(`User: "${name}" is disqualified due to: ${reason}. You exceeded timeout time of ${timeLimit} seconds.`);
     }
+ }
+
 }
 
 // This is a placeholder function; replace it with your actual ESP32 data processing logic
@@ -392,7 +393,7 @@ function resetMemory() {
     localStorage.removeItem('leaderboardName');
 
     // Alert
-    const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO REMOVE STORAGE! THIS CANNOT BE UNDONE!?");
+    const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO CLEAR STORAGE! THIS CANNOT BE UNDONE!");
     
     // Check if the user clicked "Cancel"
     if (userConfirmed) {

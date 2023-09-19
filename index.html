@@ -58,7 +58,7 @@
 </head>
 <body>
     <h1>Leaderboard</h1>
-    <input type="text" id="nameInput" placeholder="Enter your name">
+    <input type="text" id="nameInput" placeholder="Enter Your Geo-Name">
     <button onclick="addEntry()">Add to Leaderboard</button>
     <div id="leaderboard">
         <h2>Top Times</h2>
@@ -66,108 +66,301 @@
             <!-- Leaderboard entries will go here -->
         </ol>
     </div>
+    
 
     <button id="resetButton" onclick="resetMemory()">Reset Board</button>
 
+    <input type="text" id="manualTimeInput" placeholder="Enter time (seconds)">
+    <button onclick="addManualTime()">Add Manual Time</button>
+    
+
+    <label for="timeLimitInput">Set Disqualification Time Limit (minutes):</label>
+<input type="number" id="timeLimitInput" value="30" min="1">
+<button onclick="setDisqualificationTimeLimit()">Set Limit</button>
+
+<div id="leaderboard">
+    <ol id="leaderList">
+        <!-- Leaderboard entries will go here -->
+    </ol>
+</div>
+
+
+<div id="disqualifiedSection" style="display: none;">
+    <h2>You Have Been Disqualified!</h2>
+    <h6>Please Enter Your Name And Try Again</h6>
+    <ul id="disqualifiedList">
+        <!-- Disqualified entries will go here -->
+    </ul>
+</div>
+
+
     <script>
-        const leaderboard = document.getElementById('leaderList');
-        const nameInput = document.getElementById('nameInput');
-        const addButton = document.querySelector('button');
+const leaderboard = document.getElementById('leaderList');
+const nameInput = document.getElementById('nameInput');
+const addButton = document.querySelector('button');
+const esp32DataInput = document.getElementById('esp32Data');
+const esp32Button = document.getElementById('esp32Button');
+const manualTimeInput = document.getElementById('manualTimeInput');
+const manualTimeButton = document.getElementById('manualTimeButton');
+const timeLimitInput = document.getElementById('timeLimitInput');
+const disqualifiedSection = document.getElementById('disqualifiedSection');
+const disqualifiedList = document.getElementById('disqualifiedList');
 
-        // Check if a name is already stored in local storage
-        const storedName = localStorage.getItem('leaderboardName');
+let disqualificationTimeLimit = 30 * 60; // Default to 30 minutes in seconds
 
-        if (storedName) {
-            // If a name is found, disable the input and change the button color to grey
-            nameInput.value = storedName;
-            nameInput.disabled = true;
-            addButton.disabled = true;
-            addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+// Check if a name is already stored in local storage
+let storedName = localStorage.getItem('leaderboardName');
+
+if (storedName) {
+    // If a name is found, enable the input for a new name
+    nameInput.value = storedName;
+    addButton.disabled = false;
+    nameInput.disabled = true;
+    addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+} else {
+    // If no name is found, enable the input for a new name
+    nameInput.disabled = false;
+    addButton.disabled = false;
+}
+
+// Check if leaderboard data is already stored in local storage
+const storedLeaderboard = localStorage.getItem('leaderboardData');
+
+// Initialize the leaderboard with the stored data or an empty array
+const leaderboardData = storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+
+// Check if disqualified names are stored in local storage
+const storedDisqualifiedNames = localStorage.getItem('disqualifiedNames');
+
+// Initialize the disqualified names with the stored data or an empty array
+const disqualifiedNames = storedDisqualifiedNames ? JSON.parse(storedDisqualifiedNames) : [];
+
+// Update the leaderboard display based on the stored data
+for (const entryData of leaderboardData) {
+    const entry = document.createElement('li');
+    const formattedTime = entryData.time.startsWith('time: ') ? entryData.time : `time: ${entryData.time}`;
+    entry.innerHTML = `<strong>${entryData.name}</strong>: ${formattedTime}`;
+    leaderboard.appendChild(entry);
+}
+
+// Remove disqualified names from the main leaderboard during initialization
+for (const disqualifiedName of disqualifiedNames) {
+    const mainLeaderboardEntries = leaderboard.querySelectorAll('li');
+    for (const entry of mainLeaderboardEntries) {
+        const entryName = entry.querySelector('strong').textContent;
+        if (entryName === disqualifiedName) {
+            entry.remove();
+            break;
         }
+    }
+}
 
-        // Check if leaderboard data is already stored in local storage
-        const storedLeaderboard = localStorage.getItem('leaderboardData');
+function addEntry() {
+    const name = nameInput.value.trim();
 
-        // Initialize the leaderboard with the stored data or an empty array
-        const leaderboardData = storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+    if (name === '') {
+        alert('Please enter a name.');
+        return;
+    }
 
-        // Update the leaderboard display based on the stored data
-        for (const entryData of leaderboardData) {
-            const entry = document.createElement('li');
-            entry.innerHTML = `<strong>${entryData.name}</strong>: ${entryData.time} seconds`;
-            leaderboard.appendChild(entry);
-        }
+    const entry = document.createElement('li');
+    entry.innerHTML = `<strong>${name}</strong>: Waiting for data..`;
 
-        function addEntry() {
-            const name = nameInput.value.trim();
+    leaderboard.appendChild(entry);
 
-            if (name === '') {
-                alert('Please enter a name.');
-                return;
+    // Store the entered name in local storage
+    localStorage.setItem('leaderboardName', name);
+
+    // Disable the input and change the button color to grey after adding the name
+    nameInput.disabled = true;
+    addButton.disabled = true;
+    addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+
+    // Clear input field
+    nameInput.value = '';
+
+    // Add the entry data to the leaderboard data
+    const entryData = { name, time: 'N/A' };
+    leaderboardData.push(entryData);
+
+    // Update the stored leaderboard data
+    localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+}
+
+function updateEntry(name, time) {
+    const entries = leaderboard.querySelectorAll('li');
+
+    // Find the entry with the matching name and update it
+    for (const entry of entries) {
+        const entryName = entry.querySelector('strong').textContent;
+        if (entryName === name) {
+            // Check if the entry already has a "time: " prefix
+            if (time.startsWith('time: ')) {
+                entry.innerHTML = `<strong>${name}</strong>: ${time}`;
+            } else {
+                entry.innerHTML = `<strong>${name}</strong>: time: ${time}`;
             }
+            break;
+        }
+    }
 
-            const entry = document.createElement('li');
-            entry.innerHTML = `<strong>${name}</strong>: Waiting for data..`;
+    // Update the leaderboard data with the received time
+    const updatedEntry = leaderboardData.find((entryData) => entryData.name === name);
+    if (updatedEntry) {
+        updatedEntry.time = time;
 
-            leaderboard.appendChild(entry);
+        // Update the stored leaderboard data
+        localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+    }
 
-            // Store the entered name in local storage
-            localStorage.setItem('leaderboardName', name);
+    // Check if the time exceeds the disqualification time limit
+    if (time.startsWith('time: ')) {
+        const timeInSeconds = parseInt(time.split(' ')[1]);
+        if (timeInSeconds > disqualificationTimeLimit) {
+            // Disqualify the user and display the reason
+            disqualifyUser(name, 'over the time limit', disqualificationTimeLimit);
+        }
+    }
+}
 
-            // Disable the input and change the button color to grey after adding the name
-            nameInput.disabled = true;
-            addButton.disabled = true;
-            addButton.style.backgroundColor = 'grey'; // Change the button color to grey
+// Simulate receiving data from the ESP32 and update the leaderboard
+function simulateESP32() {
+    const esp32Data = esp32DataInput.value.trim();
 
-            // Clear input field
-            nameInput.value = '';
+    if (esp32Data === '') {
+        alert('Please enter ESP32 data.');
+        return;
+    }
 
-            // Add the entry data to the leaderboard data
-            const entryData = { name, time: 'N/A' };
-            leaderboardData.push(entryData);
+    // Assuming you have a function to process the ESP32 data and get the time
+    // For example, let's say you have a function called processDataFromESP32
+    const timeFromESP32 = processDataFromESP32(esp32Data);
 
-            // Update the stored leaderboard data
-            localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+    if (timeFromESP32 !== null) {
+        // Get the user's name from local storage
+        const userName = localStorage.getItem('leaderboardName');
+
+        if (userName) {
+            // Update the leaderboard with the received time for the user
+            updateEntry(userName, timeFromESP32);
+        } else {
+            alert('No user name found. Please enter your name first.');
         }
 
-        // Simulate receiving data from the ESP32 and update the leaderboard
-        function updateEntry(name, time) {
-            const entries = leaderboard.querySelectorAll('li');
+        esp32DataInput.value = ''; // Clear the input field
+    } else {
+        alert('Invalid ESP32 data. Please check the format.');
+    }
+}
 
-            // Find the most recent entry with "N/A" and update it
-            for (let i = entries.length - 1; i >= 0; i--) {
-                const entryText = entries[i].textContent;
-                if (entryText.includes('N/A')) {
-                    entries[i].textContent = `<strong>${name}</strong>: ${time} seconds`;
-                    break;
-                }
-            }
+// Handle manual time entry
+function addManualTime() {
+    const time = manualTimeInput.value.trim();
 
-            // Update the leaderboard data with the received time
-            const updatedEntry = leaderboardData.find((entryData) => entryData.name === name);
-            if (updatedEntry) {
-                updatedEntry.time = time;
-                localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
-            }
+    if (time === '') {
+        alert('Please enter a time.');
+        return;
+    }
+
+    // Get the user's name from local storage
+    const userName = localStorage.getItem('leaderboardName');
+
+    if (userName) {
+        // Update the leaderboard with the manually entered time for the user
+        const formattedTime = time.startsWith('time: ') ? time : `time: ${time}`;
+        updateEntry(userName, formattedTime);
+        manualTimeInput.value = ''; // Clear the input field
+    } else {
+        alert('No user name found. Please enter your name first.');
+    }
+}
+
+// Set the disqualification time limit
+function setDisqualificationTimeLimit() {
+    const newLimit = parseInt(timeLimitInput.value);
+    if (!isNaN(newLimit) && newLimit >= 1) {
+        disqualificationTimeLimit = newLimit * 60; // Convert minutes to seconds
+        alert(`Disqualification time limit set to ${newLimit} minutes.`);
+    } else {
+        alert('Please enter a valid time limit (in minutes).');
+    }
+}
+
+function disqualifyUser(name, reason, timeLimit) {
+    const entry = document.createElement('li');
+    entry.innerHTML = `<strong>${name}</strong>: Disqualified (${reason}, Time Limit: ${timeLimit / 60} minutes)`;
+    disqualifiedList.appendChild(entry);
+    // Display the disqualified section
+    disqualifiedSection.style.display = 'block';
+
+    // Remove the user's entry from the main leaderboard
+    const mainLeaderboardEntries = leaderboard.querySelectorAll('li');
+    for (const entry of mainLeaderboardEntries) {
+        const entryName = entry.querySelector('strong').textContent;
+        if (entryName === name) {
+            entry.remove();
+            break;
         }
+    }
 
-        function resetMemory() {
-            // Clear the name from local storage
-            localStorage.removeItem('leaderboardName');
+    // Allow the user to enter a new name
+    nameInput.disabled = false;
+    addButton.disabled = false;
+    addButton.style.backgroundColor = '';
+    localStorage.removeItem('leaderboardName'); // Clear the stored name
 
-            // Alert
-            const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO REMOVE STORAGE! THIS CANNOT BE UNDONE!?");
-            
-            // Check if the user clicked "Cancel"
-            if (userConfirmed) {
-                // User clicked "OK" or closed the dialog
-                alert("Deleting...");
-                // Clear the leaderboard data from local storage
-                localStorage.removeItem('leaderboardData');
-                // Refresh the page to clear the displayed data
-                location.reload();
-            }
+    // Store the disqualified name in local storage
+    disqualifiedNames.push(name);
+    localStorage.setItem('disqualifiedNames', JSON.stringify(disqualifiedNames)); // Save disqualified names
+
+    // Update the leaderboard data after removing the disqualified name
+    const updatedLeaderboardData = leaderboardData.filter((entryData) => entryData.name !== name);
+    leaderboardData.length = 0;
+    leaderboardData.push(...updatedLeaderboardData);
+    localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData)); // Update leaderboard data
+
+    // Check if the time exceeds the disqualification time limit
+    if (timeLimit !== undefined && timeLimit !== null) {
+        if (timeLimit <= 0) {
+            alert('Disqualification time limit reached. The user is disqualified.');
+        } else {
+            alert(`The user is disqualified due to: ${reason}. Disqualification time limit exceeded by ${timeLimit} seconds.`);
         }
+    }
+}
+
+// This is a placeholder function; replace it with your actual ESP32 data processing logic
+function processDataFromESP32(data) {
+    // Here, you should parse the data and extract the time
+    // For example, if your data format is 'time=XX', you can do something like this:
+    const timeMatch = data.match(/time=(\d+)/);
+    if (timeMatch) {
+        const timeInSeconds = parseInt(timeMatch[1]);
+        return `time: ${timeInSeconds}`;
+    }
+    return null; // Return null if the data format is invalid
+}
+
+function resetMemory() {
+    // Clear the name from local storage
+    localStorage.removeItem('leaderboardName');
+
+    // Alert
+    const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO REMOVE STORAGE! THIS CANNOT BE UNDONE!?");
+    
+    // Check if the user clicked "Cancel"
+    if (userConfirmed) {
+        // User clicked "OK" or closed the dialog
+        alert("Deleting...");
+        // Clear the leaderboard data from local storage
+        localStorage.removeItem('leaderboardData');
+        // Clear disqualified names from local storage
+        localStorage.removeItem('disqualifiedNames');
+        // Refresh the page to clear the displayed data
+        location.reload();
+    }
+}
+
     </script>
 </body>
 </html>

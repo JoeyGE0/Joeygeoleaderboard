@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <h1 class="top-bar">
-        <span style="color: #ffffff;">
-            <strong>&nbsp; &nbsp;<span style="font-size: 12px;" class="custom-text">GCAE88J - Live Leaderboard</span></strong>
+        <span>
+            <strong>&nbsp; &nbsp;<span class="custom-text">GCAE88J - Live Leaderboard</span></strong>
         </span>
     </h1>
     
@@ -35,16 +35,39 @@
             cursor: pointer;
         }
 
-        body {
-            font-family: Arial, sans-serif;
+
+        /* Light mode styles */
+body {
+    font-family: Arial, sans-serif;
             text-align: center;
-        }
+  background-color: white;
+  color: black;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  body {
+    font-family: Arial, sans-serif;
+            text-align: center;
+    background-color: black;
+    color: white;
+  }
+}
+
 
         h1, h2 {
             color: #333;
             padding-top: 20px;
             padding-bottom: 20px;
         }
+
+                /* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    h1, h2 {
+    color: #ffffff; /* Set the text color for dark mode here */
+  }
+}
+
 
         button {
     background-color: #5e4dcd;
@@ -69,6 +92,14 @@ input {
     transition: background-color .3s ease-in-out;
 }
 
+                /* Dark mode styles */
+                @media (prefers-color-scheme: dark) {
+    input {
+    color: #ffffff; /* Set the text color for dark mode here */
+  }
+}
+
+
 button:hover {
     background-color: #5e5dcd;
 }
@@ -80,12 +111,22 @@ button:hover {
             padding: 0;
         }
 
+
         li {
             background-color: #f7f7f7;
             padding: 10px;
             margin: 5px;
             border-radius: 5px;
         }
+
+                        /* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    li {
+    color: #ffffff; /* Set the text color for dark mode here */
+    background-color: #454545;
+  }
+}
+        
 
         /* Style for the greyed-out button */
         button[disabled] {

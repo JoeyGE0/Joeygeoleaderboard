@@ -334,6 +334,7 @@ function addEntry() {
     const name = nameInput.value.trim();
 
     if (name === '') {
+        navigator.vibrate(200);
         alert('Please enter a name.');
         return;
     }
@@ -424,11 +425,13 @@ function simulateESP32() {
             // Update the leaderboard with the received time for the user
             updateEntry(userName, timeFromESP32);
         } else {
+            navigator.vibrate(200);
             alert('No user name found. Please enter your name first.');
         }
 
         esp32DataInput.value = ''; // Clear the input field
     } else {
+        navigator.vibrate(200);
         alert('Invalid ESP32 data. Please check the format.');
     }
 }
@@ -438,6 +441,7 @@ function addManualTime() {
     const time = manualTimeInput.value.trim();
 
     if (time === '') {
+        navigator.vibrate(200);
         alert('Please enter a time.');
         return;
     }
@@ -451,6 +455,7 @@ function addManualTime() {
         updateEntry(userName, formattedTime);
         manualTimeInput.value = ''; // Clear the input field
     } else {
+        navigator.vibrate(200);
         alert('No user name found. Please enter your name first.');
     }
 }
@@ -525,13 +530,14 @@ function processDataFromESP32(data) {
 function resetMemory() {
     // Clear the name from local storage
     localStorage.removeItem('leaderboardName');
-
+    navigator.vibrate(200);
     // Alert
     const userConfirmed = window.confirm("ARE YOU SURE YOU WANT TO CLEAR STORAGE! THIS CANNOT BE UNDONE!");
     
     // Check if the user clicked "Cancel"
     if (userConfirmed) {
         // User clicked "OK" or closed the dialog
+        navigator.vibrate(200);
         alert("Deleting...");
         // Clear the leaderboard data from local storage
         localStorage.removeItem('leaderboardData');

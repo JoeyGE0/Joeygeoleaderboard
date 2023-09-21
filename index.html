@@ -141,16 +141,77 @@ button:hover {
             border-radius: 5px;
         }
 
-        
+
+
+/* Add unique class names to the suggestions */
+.suggestion-container {
+    position: relative;
+}
+
+.suggestion-list {
+    position: absolute;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    max-height: 120px;
+    overflow-y: auto;
+    background-color: rgb(241, 239, 239);
+    z-index: 1;
+    width: 50%; /* Adjust width as needed */
+}
+
+                        /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+    .suggestion-list {
+    color: #ffffff; /* Set the text color for dark mode here */
+    background-color: #454545;
+    box-shadow: 0 2px 4px rgba(21, 21, 21, 0.4);
+  }
+}
+
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+@media (prefers-color-scheme: dark) {
+.suggestion-item:hover {
+    background-color: #4f4f4f;
+  }
+}
+
+
+footer {
+            background-color: #efefef00; /* Background color for the footer */
+            padding: 10px; /* Add some padding for spacing */
+            text-align: center; /* Center-align the text */
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            font-weight: 550;
+        }
+
+        /* Style for the smaller text below */
+        footer p.small-text {
+            font-size: 10px; /* Adjust the font size to your preference */
+            margin-top: 8px; /* Add some space between the lines */
+            font-weight: lighter;
+        }
+
     </style>
 </head>
 <body>
 
     <h1>Leaderboard</h1>
     <div style="display: inline-block;">
-        <input type="text" id="nameInput" placeholder="Enter Your Geo-Name" minlength="3" maxlength="24">
-
-        <button onclick="addEntry()" title="Click to Add to Leaderboard">Add to Leaderboard</button>
+        <div class="suggestion-container">
+            <input type="text" id="nameInput" placeholder="Enter Your Geo-Name" minlength="3" maxlength="24">
+            <div id="suggestionList" class="suggestion-list"></div>
+            <button onclick="addEntry()" title="Click to Add to Leaderboard">Add to Leaderboard</button>
+        </div>
 
     </div>
     <div id="leaderboard">
@@ -185,7 +246,12 @@ button:hover {
     </ul>
 </div>
 
-<p>You Have Reached The End!</p>
+<footer>
+    <div>
+        <p>You have reached the end.</p>
+    </div>
+    <p class="small-text">A cache by JoeyGE0</p>
+</footer>
 
     <script>
 const leaderboard = document.getElementById('leaderList');
@@ -454,6 +520,52 @@ function resetMemory() {
         location.reload();
     }
 }
+
+// Array of keywords for autocomplete
+const keywords = ["rattll", "Popmac", "tmann421", "huhugrub", "Phronimos", "TwigNZ", "Pushn East", "the Seagnoid", "Etherlord Clan", "geodatum", "haydn.seek", "skindo", "Yeetrees", "watcache", "searchSteve", "LGLNZ", "mar1sa", "Firewoof", "YetiNZ", "funkymunkyzone", "Mr-Mcgoo", "supasi", "all7ofusnz", "sunju", "GSEL", "edvern", "woolwood9", "spudnz", "barefootguru", "stardust718", "markhnz", "mjmnz", "tommygun9", "NZ B", "Rubbishparty", "Flowerydaze", "LL113", "JoeyGE0 :)", "wb1116", "Swaybars", "LNM1961", "tahlia2006", "capperz", "-gonefishing-", "helbaby7", "Talla64", "AtomsNZ", "brucewwnz", "saveva", "4Tees", "taybee nz", "bruzie", "2 Bulbars", "KayGeeDee", "Gr33nslime", "11hpg11", "Gorbygorbachov", "Scoria", "MIOW4", "PIMacNZ", "Just-Lookin", "Jamogen", "Itchyfeet2020", "jono s", "FapAndGap", "matagouri tramyard", "suepate", "coleybags", "Geckoh", "CrystalFairy", "Juty Bug", "Davidson123Clan", "Teeps & Mum", "squirrel nutcase", "jimmynz", "2wombles", "ThatWeirdGuy04", "Philip.Perry", "Jodiporsche", "3Prettys", "Troodles", "Ewakef", "TaraTed", "Jägersmum", "Mc Jandals", "rosmar", "Justlooking00", "RogerWInz", "fuzzball56", "NZFlossy", "nightowl19", "skeetinnz", "fanfan-77", "jesso22", "LeftyNZ", "julietlalpha", "emiliyah", "TrinityNZ", "deltatea", "alsjfs", "TreMichLan", "ADV", "Marchwood", "ritaryanandjj", "Lostcourse", "taybee", "NumptyBum", "kiwicouple", "Punga and Paua", "Emvy_Us", "rustynz", "Isis58", "D6nz", "Nosynel", "Denomynator", "Niscar", "DangerSAM", "loopysue"];
+
+const suggestionList = document.getElementById('suggestionList');
+
+// Function to handle input change and show autocomplete suggestions
+function handleInputChange() {
+    const inputValue = nameInput.value.toLowerCase(); // Convert input to lowercase for case-insensitive matching
+
+    // Filter keywords that start with the input value
+    const suggestions = keywords.filter(keyword => keyword.toLowerCase().startsWith(inputValue));
+
+    // Display the suggestions
+    suggestionList.innerHTML = ''; // Clear previous suggestions
+
+    // Create div elements for each suggestion
+    suggestions.forEach(suggestion => {
+        const div = document.createElement('div');
+        div.textContent = suggestion;
+        div.classList.add('suggestion-item'); // Add the suggestion-item class
+        div.addEventListener('click', () => {
+            // Fill the input with the selected suggestion
+            nameInput.value = suggestion;
+            // Clear the suggestion list
+            suggestionList.innerHTML = '';
+        });
+        suggestionList.appendChild(div);
+    });
+
+    // Show or hide the suggestion list based on whether there are suggestions
+    if (suggestions.length > 0) {
+        suggestionList.style.display = 'block';
+    } else {
+        suggestionList.style.display = 'none';
+    }
+}
+
+// Add event listeners for input and click outside to hide suggestions
+nameInput.addEventListener('input', handleInputChange);
+document.addEventListener('click', (event) => {
+    if (event.target !== nameInput) {
+        suggestionList.style.display = 'none';
+    }
+});
+
 
 
     </script>

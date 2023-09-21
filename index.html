@@ -202,6 +202,21 @@ footer {
             font-weight: lighter;
         }
 
+
+        .highlight {
+    		animation: glow 1s ease-in-out infinite;
+	}
+	
+    @keyframes glow {
+		0%,
+		100% {
+			text-shadow: 0 0 5px rgb(174, 255, 0);
+		}
+		50% {
+			text-shadow: 0 0 10px #ffffff00;
+		}
+	}
+        
     </style>
 </head>
 <body>
@@ -325,6 +340,11 @@ function addEntry() {
 
     const entry = document.createElement('li');
     entry.innerHTML = `<strong>${name}</strong>: Waiting for data..`;
+
+    // Check if this entry's name matches the name in the input box and add the "highlight" class
+    if (name === nameInput.value.trim()) {
+                entry.classList.add('highlight');
+            }
 
     leaderboard.appendChild(entry);
 
@@ -567,6 +587,18 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// Function to display a data usage warning with just an "OK" button
+function showDataUsageWarning() {
+    alert("This action may use your mobile data and may incur charges. Click 'OK' to acknowledge.");
+}
+
+// Function to run when the page opens
+function onPageLoad() {
+    // You can run other tasks here when the page loads
+}
+
+// Add an event listener for page load
+window.addEventListener('load', onPageLoad);
 
 
     </script>
